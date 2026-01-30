@@ -35,7 +35,7 @@ class InvitationModel(Base):
     usage_limit = Column(Integer, nullable=True)
     usage_count = Column(Integer, nullable=False, default=0)
     used_by = Column(JSON, nullable=False, default=list)
-    metadata = Column(JSON, nullable=False, default=dict)
+    metadata_ = Column("metadata", JSON, nullable=False, default=dict)
     revoked_at = Column(DateTime, nullable=True)
     revoked_by = Column(String(255), nullable=True)
     revocation_reason = Column(Text, nullable=True)
@@ -72,7 +72,7 @@ class SQLAlchemyInvitationRepository(IInvitationRepository):
             usage_limit=UsageLimit(model.usage_limit),
             usage_count=model.usage_count,
             used_by=model.used_by or [],
-            metadata=model.metadata or {},
+            metadata=model.metadata_ or {},
             revoked_at=model.revoked_at,
             revoked_by=model.revoked_by,
             revocation_reason=model.revocation_reason,
@@ -98,7 +98,7 @@ class SQLAlchemyInvitationRepository(IInvitationRepository):
             usage_limit=invitation.usage_limit.value,
             usage_count=invitation.usage_count,
             used_by=invitation.used_by,
-            metadata=invitation.metadata,
+            metadata_=invitation.metadata,
             revoked_at=invitation.revoked_at,
             revoked_by=invitation.revoked_by,
             revocation_reason=invitation.revocation_reason,
@@ -119,7 +119,7 @@ class SQLAlchemyInvitationRepository(IInvitationRepository):
             existing.usage_limit = invitation.usage_limit.value
             existing.usage_count = invitation.usage_count
             existing.used_by = invitation.used_by
-            existing.metadata = invitation.metadata
+            existing.metadata_ = invitation.metadata
             existing.revoked_at = invitation.revoked_at
             existing.revoked_by = invitation.revoked_by
             existing.revocation_reason = invitation.revocation_reason

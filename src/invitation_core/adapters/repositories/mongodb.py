@@ -39,6 +39,21 @@ class MongoDBInvitationRepository(IInvitationRepository):
         logger.debug("Ensured MongoDB indexes for invitations collection")
 
     @staticmethod
+    def _normalize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+        """Normalize datetime to millisecond precision (MongoDB's precision).
+
+        Args:
+            dt: Datetime to normalize
+
+        Returns:
+            Datetime with microseconds truncated to milliseconds, or None
+        """
+        if dt is None:
+            return None
+        # MongoDB stores with millisecond precision, truncate microseconds
+        return dt.replace(microsecond=(dt.microsecond // 1000) * 1000)
+
+    @staticmethod
     def _to_domain(doc: dict) -> Invitation:
         """Convert MongoDB document to domain entity.
 
@@ -53,13 +68,13 @@ class MongoDBInvitationRepository(IInvitationRepository):
             code=InvitationCode(doc["code"]),
             status=InvitationStatus(doc["status"]),
             created_by=doc["created_by"],
-            created_at=doc["created_at"],
-            expires_at=doc.get("expires_at"),
+            created_at=MongoDBInvitationRepository._normalize_datetime(doc["created_at"]),
+            expires_at=MongoDBInvitationRepository._normalize_datetime(doc.get("expires_at")),
             usage_limit=UsageLimit(doc.get("usage_limit")),
             usage_count=doc.get("usage_count", 0),
             used_by=doc.get("used_by", []),
             metadata=doc.get("metadata", {}),
-            revoked_at=doc.get("revoked_at"),
+            revoked_at=MongoDBInvitationRepository._normalize_datetime(doc.get("revoked_at")),
             revoked_by=doc.get("revoked_by"),
             revocation_reason=doc.get("revocation_reason"),
         )
@@ -79,13 +94,13 @@ class MongoDBInvitationRepository(IInvitationRepository):
             "code": str(invitation.code).upper(),  # Store uppercase for case-insensitive search
             "status": invitation.status.value,
             "created_by": invitation.created_by,
-            "created_at": invitation.created_at,
-            "expires_at": invitation.expires_at,
+            "created_at": MongoDBInvitationRepository._normalize_datetime(invitation.created_at),
+            "expires_at": MongoDBInvitationRepository._normalize_datetime(invitation.expires_at),
             "usage_limit": invitation.usage_limit.value,
             "usage_count": invitation.usage_count,
             "used_by": invitation.used_by,
             "metadata": invitation.metadata,
-            "revoked_at": invitation.revoked_at,
+            "revoked_at": MongoDBInvitationRepository._normalize_datetime(invitation.revoked_at),
             "revoked_by": invitation.revoked_by,
             "revocation_reason": invitation.revocation_reason,
         }

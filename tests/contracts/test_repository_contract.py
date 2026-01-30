@@ -281,7 +281,8 @@ class RepositoryContractTests:
         found = repository.find_by_id(invitation.id)
         assert found.code == InvitationCode("FULL123")
         assert found.created_by == "admin"
-        assert found.expires_at == expires_at
+        # MongoDB stores datetimes with millisecond precision, allow slight difference
+        assert abs((found.expires_at - expires_at).total_seconds()) < 0.001
         assert found.usage_limit.value == 10
         assert found.metadata == metadata
         assert found.usage_count == 0
