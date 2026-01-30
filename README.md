@@ -298,53 +298,54 @@ service = InvitationService(repository, event_bus)
 # Install dev dependencies
 pip install -e ".[dev,test]"
 
-# Run unit tests only (no database required)
-pytest tests/unit tests/contracts
+# Run ALL tests (110+ tests, 74% coverage)
+pytest
+
+# Run only in-memory tests (fastest, no database required)
+pytest --adapter=memory
 
 # Run with coverage
-pytest tests/unit tests/contracts --cov=src/invitation_core --cov-report=html
+pytest --cov=src/invitation_core --cov-report=html
 ```
 
-### Integration Tests with Real Databases
+### Testing with Real Databases
 
-To run integration tests with PostgreSQL or MongoDB:
+The same contract tests run against **all repository implementations** (in-memory, SQLAlchemy, MongoDB):
 
+**PostgreSQL:**
 ```bash
-# Setup PostgreSQL test database
+# Setup database
 python scripts/setup_test_db.py \
   --db-type postgresql \
   --host localhost \
   --username postgres \
-  --password yourpassword \
-  --db-name test_invitation_core
+  --password yourpassword
 
-# Set environment variable
+# Configure and run tests
+export TEST_DB_TYPE=postgresql
 export TEST_DB_CONNECTION_STRING="postgresql://postgres:yourpassword@localhost:5432/test_invitation_core"
-
-# Run PostgreSQL integration tests
-pytest tests/integration/test_sqlalchemy_repository.py
+pytest --adapter=sqlalchemy
 ```
 
+**MongoDB:**
 ```bash
-# Setup MongoDB test database
+# Setup database
 python scripts/setup_test_db.py \
   --db-type mongodb \
   --host localhost \
   --username admin \
-  --password yourpassword \
-  --db-name test_invitation_core
+  --password yourpassword
 
-# Set environment variables
+# Configure and run tests
+export TEST_DB_TYPE=mongodb
 export TEST_MONGO_CONNECTION_STRING="mongodb://admin:yourpassword@localhost:27017/"
 export TEST_MONGO_DB_NAME="test_invitation_core"
-
-# Run MongoDB integration tests
-pytest tests/integration/test_mongodb_repository.py
+pytest --adapter=mongodb
 ```
 
+**All adapters at once** (requires both databases configured):
 ```bash
-# Run ALL tests (unit + integration)
-pytest
+pytest tests/contracts
 ```
 
 ## Examples

@@ -297,3 +297,23 @@ class TestInMemoryRepository(RepositoryContractTests):
         from invitation_core.adapters.repositories.memory import InMemoryInvitationRepository
 
         return InMemoryInvitationRepository()
+
+
+class TestSQLAlchemyRepository(RepositoryContractTests):
+    """Contract tests for SQLAlchemy repository."""
+
+    @pytest.fixture
+    def repository(self, db_session):
+        from invitation_core.adapters.repositories.sqlalchemy import SQLAlchemyInvitationRepository
+
+        return SQLAlchemyInvitationRepository(db_session)
+
+
+class TestMongoDBRepository(RepositoryContractTests):
+    """Contract tests for MongoDB repository."""
+
+    @pytest.fixture
+    def repository(self, mongo_db):
+        from invitation_core.adapters.repositories.mongodb import MongoDBInvitationRepository
+
+        return MongoDBInvitationRepository(mongo_db)
