@@ -298,11 +298,53 @@ service = InvitationService(repository, event_bus)
 # Install dev dependencies
 pip install -e ".[dev,test]"
 
-# Run tests
-pytest
+# Run unit tests only (no database required)
+pytest tests/unit tests/contracts
 
 # Run with coverage
-pytest --cov=src/invitation_core --cov-report=html
+pytest tests/unit tests/contracts --cov=src/invitation_core --cov-report=html
+```
+
+### Integration Tests with Real Databases
+
+To run integration tests with PostgreSQL or MongoDB:
+
+```bash
+# Setup PostgreSQL test database
+python scripts/setup_test_db.py \
+  --db-type postgresql \
+  --host localhost \
+  --username postgres \
+  --password yourpassword \
+  --db-name test_invitation_core
+
+# Set environment variable
+export TEST_DB_CONNECTION_STRING="postgresql://postgres:yourpassword@localhost:5432/test_invitation_core"
+
+# Run PostgreSQL integration tests
+pytest tests/integration/test_sqlalchemy_repository.py
+```
+
+```bash
+# Setup MongoDB test database
+python scripts/setup_test_db.py \
+  --db-type mongodb \
+  --host localhost \
+  --username admin \
+  --password yourpassword \
+  --db-name test_invitation_core
+
+# Set environment variables
+export TEST_MONGO_CONNECTION_STRING="mongodb://admin:yourpassword@localhost:27017/"
+export TEST_MONGO_DB_NAME="test_invitation_core"
+
+# Run MongoDB integration tests
+pytest tests/integration/test_mongodb_repository.py
+```
+
+```bash
+# Run ALL tests (unit + integration)
+pytest
 ```
 
 ## Examples
